@@ -198,7 +198,7 @@ export default function EditProfilePage() {
             <button
               className="border-gray03 hover:bg-red-50 text-red-600 h-[50px] w-full rounded-[10px] border text-base font-bold"
               onClick={async () => {
-                if (window.confirm("정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+                if (window.confirm("정말로 탈퇴하시겠습니까? 모든 정보가 삭제되며 복구할 수 없습니다.")) {
                   try {
                     await withdrawUser();
                     
