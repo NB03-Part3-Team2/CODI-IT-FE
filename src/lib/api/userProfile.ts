@@ -33,14 +33,8 @@ export const editUserProfile = async ({ currentPassword, nickname, newPassword, 
     formData.append("image", imageFile);
   }
 
-  try {
-    const { data } = await axiosInstance.patch("/users/me", formData);
-    return data;
-  } catch (err) {
-    const error = err as AxiosError;
-    console.error("프로필 수정 실패", error.response?.data || error.message);
-    throw err;
-  }
+  const { data } = await axiosInstance.patch("/users/me", formData);
+  return data;
 };
 
 export const getFavoriteStore = async (): Promise<FavoriteStores[]> => {
@@ -50,12 +44,6 @@ export const getFavoriteStore = async (): Promise<FavoriteStores[]> => {
 };
 
 export const withdrawUser = async () => {
-  try {
-    const axiosInstance = getAxiosInstance();
-    await axiosInstance.delete("/users/delete");
-  } catch (err) {
-    const error = err as AxiosError;
-    console.error("회원탈퇴 API 실패", error.response?.data || error.message);
-    throw err;
-  }
+  const axiosInstance = getAxiosInstance();
+  await axiosInstance.delete("/users/delete");
 };
