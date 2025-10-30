@@ -1,6 +1,5 @@
 import { getAxiosInstance } from "@/lib/api/axiosInstance";
 import { FavoriteStores } from "@/types/store";
-import { AxiosError } from "axios";
 
 interface EditProfileParams {
   currentPassword: string;

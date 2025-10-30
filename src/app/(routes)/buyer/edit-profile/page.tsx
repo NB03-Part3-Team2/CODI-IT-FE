@@ -53,7 +53,7 @@ export default function EditProfilePage() {
       setConfirmPassword("");
       setPasswordError("");
     },
-    onError: (error: AxiosError<any>) => {
+    onError: (error: AxiosError<{ success?: boolean; error?: { code: number; message: string }; message?: string }>) => {
       // 백엔드 에러 메시지 추출
       let errorMessage = "수정에 실패했습니다.";
       
