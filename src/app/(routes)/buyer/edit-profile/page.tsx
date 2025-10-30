@@ -5,7 +5,7 @@ import ProfileButton from "@/components/button/ProfileButton";
 import ProfileInput from "@/components/input/ProfileInput";
 import { menuItems } from "@/data/buyerMenuItems";
 import { getAxiosInstance } from "@/lib/api/axiosInstance";
-import { editUserProfile } from "@/lib/api/userProfile";
+import { editUserProfile, withdrawUser } from "@/lib/api/userProfile";
 import { useToaster } from "@/proviers/toaster/toaster.hook";
 import { useUserStore } from "@/stores/userStore";
 import { User } from "@/types/User";
@@ -26,7 +26,7 @@ export default function EditProfilePage() {
   const toaster = useToaster();
   const router = useRouter();
   const axiosInstance = getAxiosInstance();
-  const setUser = useUserStore((state) => state.setUser);
+  const { setUser, logout } = useUserStore();
 
   const { data: user, refetch } = useQuery({
     queryKey: ["User"],
@@ -71,7 +71,10 @@ export default function EditProfilePage() {
     input.click();
   };
 
-  const isValid = currentPassword.trim() !== "";
+  // 현재 비밀번호와 새 비밀번호 모두 필수, 새 비밀번호는 확인과 일치해야 함
+  const isValid = currentPassword.trim() !== "" && 
+                 newPassword.trim() !== "" && 
+                 newPassword === confirmPassword;
 
   if (!user) return null;
 
@@ -141,20 +144,6 @@ export default function EditProfilePage() {
             <ProfileInput
               label="새 비밀번호 입력"
               type="password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (newPassword && e.target.value !== newPassword) {
-                  setPasswordError("비밀번호가 일치하지 않습니다.");
-                } else {
-                  setPasswordError("");
-                }
-              }}
-              placeholder="변경할 비밀번호 입력"
-            />
-            <ProfileInput
-              label="새 비밀번호 확인"
-              type="password"
               value={newPassword}
               onChange={(e) => {
                 setNewPassword(e.target.value);
@@ -164,7 +153,21 @@ export default function EditProfilePage() {
                   setPasswordError("");
                 }
               }}
-              placeholder="변경할 비밀번호 확인"
+              placeholder="새 비밀번호 입력 (필수)"
+            />
+            <ProfileInput
+              label="새 비밀번호 확인"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (newPassword && e.target.value !== newPassword) {
+                  setPasswordError("비밀번호가 일치하지 않습니다.");
+                } else {
+                  setPasswordError("");
+                }
+              }}
+              placeholder="새 비밀번호 확인 (필수)"
             />
           </div>
 
@@ -178,12 +181,15 @@ export default function EditProfilePage() {
                   return;
                 }
 
-                updateMutation.mutate({
+                // 새 비밀번호는 필수, 닉네임은 입력 없으면 현재 값 사용
+                const submitData = {
                   currentPassword,
-                  nickname: nickname.trim() || undefined,
-                  newPassword: newPassword.trim() || undefined,
+                  nickname: nickname.trim() || user.name,
+                  newPassword: newPassword.trim(),
                   imageFile: selectedImage || null,
-                });
+                };
+                
+                updateMutation.mutate(submitData);
               }}
               disabled={!isValid || !!passwordError}
             />
@@ -191,17 +197,25 @@ export default function EditProfilePage() {
             {/* 회원탈퇴 버튼 */}
             <button
               className="border-gray03 hover:bg-red-50 text-red-600 h-[50px] w-full rounded-[10px] border text-base font-bold"
-              onClick={() => {
+              onClick={async () => {
                 if (window.confirm("정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
-                  axiosInstance.delete("/users/me")
-                    .then(() => {
-                      toaster("info", "회원탈퇴가 완료되었습니다.");
-                      router.push("/");
-                    })
-                    .catch((error) => {
-                      console.error("회원탈퇴 실패:", error);
-                      toaster("warn", "회원탈퇴에 실패했습니다.");
-                    });
+                  try {
+                    await withdrawUser();
+                    
+                    // 로그아웃 로직: userStore와 localStorage 완전 초기화
+                    logout();
+                    
+                    // localStorage에서 유저 정보 직접 삭제
+                    localStorage.removeItem("codiit-user-storage");
+                    
+                    toaster("info", "회원탈퇴가 완료되었습니다.");
+                    
+                    // 홈페이지로 이동 및 페이지 새로고침
+                    window.location.href = "/";
+                  } catch (err) {
+                    console.error("회원탈퇴 실패:", err);
+                    toaster("warn", "회원탈퇴에 실패했습니다.");
+                  }
                 }
               }}
             >
