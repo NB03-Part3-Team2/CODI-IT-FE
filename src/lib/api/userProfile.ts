@@ -25,7 +25,7 @@ export const editUserProfile = async ({ currentPassword, nickname, newPassword, 
   
   // 새 비밀번호가 있으면 추가
   if (newPassword?.trim()) {
-    formData.append("password", newPassword.trim());
+    formData.append("newPassword", newPassword.trim());
   }
   
   // 이미지 파일이 있으면 추가
