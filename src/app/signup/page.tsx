@@ -23,11 +23,50 @@ export default function SignupPage() {
       router.push("/login");
     },
     onError: (error: unknown) => {
-      if (axios.isAxiosError(error) && error.response?.status === 409) {
-        toaster("warn", "이미 존재하는 이메일입니다. 다른 이메일을 사용해주세요.");
-      } else {
-        toaster("warn", "회원가입 중 오류가 발생했습니다.");
+      // 백엔드 에러 메시지 추출
+      let errorMessage = "회원가입 중 오류가 발생했습니다.";
+      
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const data = error.response.data;
+        
+        // 백엔드 응답 구조: { success: false, error: { code: 400, message: "..." } }
+        if (data.error?.message) {
+          errorMessage = data.error.message;
+        }
+        // 또는 직접 message 필드가 있는 경우
+        else if (data.message) {
+          errorMessage = data.message;
+        }
+        // 문자열인 경우
+        else if (typeof data === "string") {
+          errorMessage = data;
+        }
       }
+      
+      // Zod 에러 메시지 정리
+      // 1단계: "context 유효성 검사 실패: summary" -> "summary"만 추출
+      if (errorMessage.includes("유효성 검사 실패:")) {
+        errorMessage = errorMessage.split("유효성 검사 실패:")[1]?.trim() || errorMessage;
+      }
+      
+      // 2단계: 콤마로 구분된 여러 에러 메시지 처리
+      const messages = errorMessage.split(",").map((msg) => msg.trim());
+      
+      // 3단계: 각 메시지에서 필드명 제거
+      const fieldPrefixes = ["name:", "email:", "password:", "type:"];
+      const cleanedMessages = messages.map((msg) => {
+        for (const prefix of fieldPrefixes) {
+          if (msg.startsWith(prefix)) {
+            return msg.substring(prefix.length).trim();
+          }
+        }
+        return msg;
+      });
+      
+      // 최종 메시지: 여러 에러를 줄바꿈으로 연결
+      const finalMessage = cleanedMessages.join("\n");
+      
+      toaster("warn", finalMessage);
     },
   });
 
