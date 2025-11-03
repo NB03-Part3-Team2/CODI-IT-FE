@@ -3,8 +3,8 @@ import { FavoriteStores } from "@/types/store";
 
 interface EditProfileParams {
   currentPassword: string;
-  nickname?: string;
-  newPassword?: string;
+  nickname: string;
+  newPassword: string;
   imageFile?: File | null; // 이미지 파일 추가
 }
 
@@ -16,23 +16,19 @@ export const editUserProfile = async ({ currentPassword, nickname, newPassword, 
   
   // 기본 필드 추가
   formData.append("currentPassword", currentPassword);
-  
-  // 닉네임이 있으면 추가
-  if (nickname?.trim()) {
-    formData.append("name", nickname.trim());
-  }
-  
-  // 새 비밀번호가 있으면 추가
-  if (newPassword?.trim()) {
-    formData.append("newPassword", newPassword.trim());
-  }
-  
+  formData.append("name", nickname.trim());
+  formData.append("newPassword", newPassword.trim());
+
   // 이미지 파일이 있으면 추가
   if (imageFile instanceof File) {
     formData.append("image", imageFile);
   }
 
-  const { data } = await axiosInstance.patch("/users/me", formData);
+  const { data } = await axiosInstance.patch("/users/me", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    }
+  });
   return data;
 };
 
