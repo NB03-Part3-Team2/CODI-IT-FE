@@ -33,10 +33,8 @@ export default function LoginPage() {
             message = "잘못된 요청입니다.";
             break;
           case 401:
-            message = "이메일 또는 비밀번호가 올바르지 않습니다.";
-            break;
           case 404:
-            message = "사용자를 찾을 수 없습니다.";
+            message = "이메일 또는 비밀번호가 올바르지 않습니다.";
             break;
           default:
             message = "로그인 중 오류가 발생했습니다.";
