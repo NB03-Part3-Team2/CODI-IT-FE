@@ -27,7 +27,6 @@ export interface BuyerOrderItem {
 
 export interface BuyerProduct {
   id: string;
-  storeId: string;
   name: string;
   price: number;
   image: string;
