@@ -30,9 +30,10 @@ export default function ReviewEditModal({ open, onClose, purchase }: ReviewEditM
     control,
     handleSubmit,
     reset,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<ReviewCreateForm>({
     resolver: zodResolver(reviewCreateSchemas),
+    mode: "onChange", // 실시간 유효성 검사
     defaultValues: { 
       rating: review?.rating || 0, 
       content: review?.content || "" 
@@ -127,13 +128,13 @@ export default function ReviewEditModal({ open, onClose, purchase }: ReviewEditM
               name="rating"
               control={control}
               render={({ field: { value, onChange } }) => (
-                <div className="flex items-center justify-center gap-1">
+                <div className="flex flex-col items-center gap-2">
                   <Stars
                     size="XLarge"
                     rating={value}
                     onChange={onChange}
                   />
-                  {errors.rating && <span className="text-red01 text-sm">{errors.rating.message}</span>}
+                  {errors.rating && <span className="text-red-600 text-sm">{errors.rating.message}</span>}
                 </div>
               )}
             />
@@ -147,7 +148,7 @@ export default function ReviewEditModal({ open, onClose, purchase }: ReviewEditM
                     label="어떤 점이 좋았나요?"
                     placeholder="최소 10자 이상 입력"
                   />
-                  {errors.content && <span className="text-red01 text-sm">{errors.content.message}</span>}
+                  {errors.content && <span className="text-red-600 text-sm">{errors.content.message}</span>}
                 </div>
               )}
             />
@@ -160,7 +161,7 @@ export default function ReviewEditModal({ open, onClose, purchase }: ReviewEditM
           variant="primary"
           color="black"
           className="h-15 w-full"
-          disabled={updateReviewMutation.isPending}
+          disabled={!isValid || updateReviewMutation.isPending}
         />
       </form>
     </Modal>

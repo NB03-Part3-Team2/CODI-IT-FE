@@ -41,7 +41,6 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
   const review = purchase.product.reviews[0];
 
   const handleDelete = () => {
-    console.log(purchase.product.reviews[0].id);
     deleteMutation.mutate();
   };
 
