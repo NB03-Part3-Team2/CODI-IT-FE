@@ -5,8 +5,10 @@ import { useToaster } from "@/proviers/toaster/toaster.hook";
 import { OrderItemResponse } from "@/types/order";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import { useState } from "react";
 import Button from "../button/Button";
 import Divder from "../divider/Divder";
+import ReviewEditModal from "./ReviewEditModal";
 
 interface ReviewViewModalProps {
   open: boolean;
@@ -18,6 +20,7 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
   const axiosInstance = getAxiosInstance();
   const queryClient = useQueryClient();
   const toaster = useToaster();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -40,6 +43,15 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
   const handleDelete = () => {
     console.log(purchase.product.reviews[0].id);
     deleteMutation.mutate();
+  };
+
+  const handleEdit = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setIsEditModalOpen(false);
+    onClose(); // 수정 완료 후 조회 모달도 닫기
   };
 
   return (
@@ -100,15 +112,32 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
             </div>
           )}
         </div>
-        <Button
-          label="리뷰 삭제"
-          size="large"
-          variant="secondary"
-          color="white"
-          className="h-15 w-full"
-          onClick={handleDelete}
-        />
+        <div className="flex flex-col gap-4">
+          <Button
+            label="리뷰 수정"
+            size="large"
+            variant="primary"
+            color="black"
+            className="h-15 w-full"
+            onClick={handleEdit}
+          />
+          <Button
+            label="리뷰 삭제"
+            size="large"
+            variant="secondary"
+            color="white"
+            className="h-15 w-full"
+            onClick={handleDelete}
+          />
+        </div>
       </div>
+
+      {/* 리뷰 수정 모달 */}
+      <ReviewEditModal
+        open={isEditModalOpen}
+        onClose={handleEditClose}
+        purchase={purchase}
+      />
     </Modal>
   );
 }
