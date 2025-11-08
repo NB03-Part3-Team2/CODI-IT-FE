@@ -18,7 +18,6 @@ export const Buyerpurchases: BuyerOrder[] = [
         isReviewed: true,
         product: {
           id: "product-1",
-          storeId: "store-1",
           name: "[단독특가] 카린 레더 자켓",
           price: 31800,
           image: "/images/Mask-group.svg",
@@ -74,7 +73,6 @@ export const Buyerpurchases: BuyerOrder[] = [
         isReviewed: false,
         product: {
           id: "product-2",
-          storeId: "store-2",
           name: "겨울 따뜻한 두꺼운 장목 양말 10colors",
           price: 14000,
           image: "/images/Mask-group.svg",
