@@ -54,7 +54,7 @@ export default function ReviewEditModal({ open, onClose, purchase }: ReviewEditM
     mutationFn: async (data: ReviewCreateForm) => {
       if (!review) throw new Error("리뷰 정보가 없습니다.");
 
-      return await axiosInstance.patch(`/review/${review.id}`, {
+      return await axiosInstance.patch(`/reviews/${review.id}`, {
         rating: data.rating,
         content: data.content,
       });

@@ -25,7 +25,7 @@ export default function ReviewViewModal({ open, onClose, purchase }: ReviewViewM
   const deleteMutation = useMutation({
     mutationFn: async () => {
       if (!purchase?.product.reviews[0]) return;
-      await axiosInstance.delete(`/review/${purchase.product.reviews[0].id}`);
+      await axiosInstance.delete(`/reviews/${purchase.product.reviews[0].id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mypage-orders"] });
