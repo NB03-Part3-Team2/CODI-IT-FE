@@ -7,7 +7,7 @@ import { menuItems } from "@/data/buyerMenuItems";
 import { tabList } from "@/data/reviewTabList";
 import useIntersectionObserver from "@/hooks/useIntersection";
 import { getAxiosInstance } from "@/lib/api/axiosInstance";
-import { OrderItemResponse, OrdersResponse } from "@/types/order";
+import { OrdersResponse } from "@/types/order";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,8 +29,13 @@ export default function ReviewPage() {
         },
       });
 
-      // 모든 주문의 orderItems를 하나의 배열로 합치기
-      const items: OrderItemResponse[] = data.data.flatMap((order) => order.orderItems);
+      // 모든 주문의 orderItems를 하나의 배열로 합치기 (orderId 포함)
+      const items = data.data.flatMap((order) =>
+        order.orderItems.map((item) => ({
+          ...item,
+          orderId: order.id,
+        })),
+      );
 
       // 탭에 따라 아이템 필터링
       const filteredItems = items.filter((item) => {
