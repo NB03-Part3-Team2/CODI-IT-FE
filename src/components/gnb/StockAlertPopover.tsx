@@ -75,15 +75,19 @@ export default function StockAlertPopover() {
         if (!event.data || event.data === "[]" || event.data === "{}") return;
 
         try {
-          const newAlarm: NotificationItem = JSON.parse(event.data);
+          // 백엔드 형식: "notification\n{...json...}"
+          const lines = event.data.split('\n');
+          const jsonData = lines[1] || lines[0]; // 2번째 줄이 JSON, 없으면 1번째 줄
+          
+          const newAlarm: NotificationItem = JSON.parse(jsonData);
 
           // id 없는 경우
           if (!newAlarm?.id) return;
 
           setNotifications((prev) => [newAlarm, ...prev]);
           setHasUnread(true); // 배지
-        } catch {
-          console.warn("잘못된 데이터:", event.data);
+        } catch (error) {
+          console.warn("잘못된 데이터:", event.data, error);
         }
       };
 
