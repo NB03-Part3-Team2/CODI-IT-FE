@@ -82,8 +82,8 @@ export default function StockAlertPopover() {
 
           setNotifications((prev) => [newAlarm, ...prev]);
           setHasUnread(true); // 배지
-        } catch (error) {
-          console.warn("잘못된 데이터:", event.data, error);
+        } catch {
+          console.warn("잘못된 데이터:", event.data);
         }
       };
 
