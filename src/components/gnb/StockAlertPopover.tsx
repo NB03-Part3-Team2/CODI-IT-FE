@@ -75,11 +75,7 @@ export default function StockAlertPopover() {
         if (!event.data || event.data === "[]" || event.data === "{}") return;
 
         try {
-          // 백엔드 형식: "notification\n{...json...}"
-          const lines = event.data.split('\n');
-          const jsonData = lines[1] || lines[0]; // 2번째 줄이 JSON, 없으면 1번째 줄
-          
-          const newAlarm: NotificationItem = JSON.parse(jsonData);
+          const newAlarm: NotificationItem = JSON.parse(event.data);
 
           // id 없는 경우
           if (!newAlarm?.id) return;
