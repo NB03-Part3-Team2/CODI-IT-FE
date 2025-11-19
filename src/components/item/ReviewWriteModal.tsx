@@ -41,7 +41,7 @@ export default function ReviewWriteModal({ open, onClose, purchase, onSubmit }: 
     mutationFn: async (data: ReviewCreateForm) => {
       if (!purchase) throw new Error("구매 정보가 없습니다.");
 
-      return await axiosInstance.post(`/product/${purchase.productId}/reviews`, {
+      return await axiosInstance.post(`/products/${purchase.productId}/reviews`, {
         orderItemId: purchase.id,
         rating: data.rating,
         content: data.content,
@@ -55,6 +55,7 @@ export default function ReviewWriteModal({ open, onClose, purchase, onSubmit }: 
       onClose();
     },
     onError: (error) => {
+      console.log("리뷰작성실패", error)
       console.error("리뷰 작성 실패:", error);
     },
   });

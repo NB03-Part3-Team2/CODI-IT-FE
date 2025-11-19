@@ -67,8 +67,19 @@ export default function StockAlertPopover() {
   // SSE 연결
   useEffect(() => {
     let eventSource: EventSource;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 3;
 
     const connect = () => {
+      // 재연결 시도 횟수 초과 시 중단
+      if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        if (!hasWarnedRef.current) {
+          toaster("warn", "알림 연결 실패. 로그인을 다시 해주세요.");
+          hasWarnedRef.current = true;
+        }
+        return;
+      }
+
       eventSource = connectNotificationSSE();
 
       eventSource.onmessage = (event) => {
@@ -82,6 +93,9 @@ export default function StockAlertPopover() {
 
           setNotifications((prev) => [newAlarm, ...prev]);
           setHasUnread(true); // 배지
+          
+          // 성공하면 재연결 카운트 리셋
+          reconnectAttempts = 0;
         } catch {
           console.warn("잘못된 데이터:", event.data);
         }
@@ -90,6 +104,7 @@ export default function StockAlertPopover() {
       eventSource.onerror = async () => {
         if (eventSource.readyState === EventSource.CLOSED) {
           eventSource.close(); // 에러 시 연결 닫힘
+          reconnectAttempts++;
 
           try {
             // access token 갱신
@@ -97,8 +112,9 @@ export default function StockAlertPopover() {
             // 성공 시 SSE 재연결
             connect();
           } catch {
+            // refresh 실패 시 재연결 중단
             if (!hasWarnedRef.current) {
-              toaster("warn", "토큰 갱신 실패");
+              toaster("warn", "세션이 만료되었습니다. 다시 로그인해주세요.");
               hasWarnedRef.current = true;
             }
           }
