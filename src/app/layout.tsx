@@ -20,6 +20,7 @@ export default function RootLayout({
           href="https://cdn.rawgit.com/moonspam/NanumSquare/master/nanumsquare.css"
           rel="stylesheet"
         />
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       </head>
       <body>
         <Providers>
