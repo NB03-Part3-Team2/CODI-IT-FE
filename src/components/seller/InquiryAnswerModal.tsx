@@ -39,16 +39,7 @@ export default function InquiryAnswerModal({ type, open, inquiry, onClose }: Inq
   const toaster = useToaster();
   const [replyId, setReplyId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (inquiry && type === "CompletedAnswer")
-      responseAnswer(inquiry.id).then((res) => {
-        const data = res?.data as InquiryDetailAnswer;
-        if (data.reply) {
-          setReplyId(data.reply.id);
-          setValue("contents", data.reply.content);
-        }
-      });
-  }, [inquiry, replyId]);
+  
 
   const statusTypeCheckValue = (WaitingAnswer: StatusTypeCheckValueType, CompletedAnswer: StatusTypeCheckValueType) =>
     type === "WaitingAnswer" ? WaitingAnswer : CompletedAnswer;
@@ -83,6 +74,18 @@ export default function InquiryAnswerModal({ type, open, inquiry, onClose }: Inq
     },
   });
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (inquiry && type === "CompletedAnswer") {
+      responseAnswer(inquiry.id).then((res) => {
+        const data = res?.data as InquiryDetailAnswer;
+        if (data.reply) {
+          setReplyId(data.reply.id);
+          setValue("contents", data.reply.content);
+        }
+      });
+    }
+  }, [inquiry, replyId, setValue, type]);
 
   useEffect(() => {
     if (inquiry) {

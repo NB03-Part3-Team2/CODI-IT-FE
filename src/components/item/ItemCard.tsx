@@ -1,7 +1,11 @@
+import { deleteOrder } from "@/lib/api/order";
+import { useToaster } from "@/proviers/toaster/toaster.hook";
 import { OrderItemResponse } from "@/types/order";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { useState } from "react";
 import Button from "../button/Button";
+import OrderCancelModal from "./OrderCancelModal";
 import ReviewViewModal from "./ReviewViewModal";
 import ReviewWriteModal from "./ReviewWriteModal";
 
@@ -12,13 +16,28 @@ interface ItemCardProps {
 export default function ItemCard({ purchases }: ItemCardProps) {
   const [reviewViewTarget, setReviewViewTarget] = useState<OrderItemResponse | null>(null);
   const [reviewWriteTarget, setReviewWriteTarget] = useState<OrderItemResponse | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<OrderItemResponse & { orderId: string } | null>(null);
+  const queryClient = useQueryClient();
+  const toaster = useToaster();
 
   const handleCloseView = () => setReviewViewTarget(null);
   const handleCloseWrite = () => setReviewWriteTarget(null);
+  const handleCloseCancel = () => setCancelTarget(null);
 
   const handleReviewSubmit = () => {
     handleCloseWrite();
   };
+
+  const cancelOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      await deleteOrder(orderId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      toaster("info", "주문이 취소되었습니다.");
+      handleCloseCancel();
+    },
+  });
 
   return (
     <div className="flex w-full flex-col gap-5">
@@ -48,17 +67,30 @@ export default function ItemCard({ purchases }: ItemCardProps) {
               </div>
             </div>
           </div>
-          <Button
-            label={item.isReviewed ? "리뷰 보기" : "리뷰 쓰기"}
-            size="medium"
-            variant="secondary"
-            color={item.isReviewed ? "white" : "black"}
-            className="h-[3.75rem] w-[12.5rem] px-[1.875rem] py-[0.875rem] font-bold"
-            onClick={() => {
-              if (item.isReviewed) setReviewViewTarget(item);
-              else setReviewWriteTarget(item);
-            }}
-          />
+          <div className="flex flex-col gap-[0.625rem]">
+            <Button
+              label="주문 취소"
+              size="medium"
+              variant="secondary"
+              color="white"
+              className="h-[3.75rem] w-[12.5rem] px-[1.875rem] py-[0.875rem] font-bold"
+              onClick={() => {
+                const targetItem = item as OrderItemResponse & { orderId: string };
+                setCancelTarget(targetItem);
+              }}
+            />
+            <Button
+              label={item.isReviewed ? "리뷰 보기" : "리뷰 쓰기"}
+              size="medium"
+              variant="secondary"
+              color={item.isReviewed ? "white" : "black"}
+              className="h-[3.75rem] w-[12.5rem] px-[1.875rem] py-[0.875rem] font-bold"
+              onClick={() => {
+                if (item.isReviewed) setReviewViewTarget(item);
+                else setReviewWriteTarget(item);
+              }}
+            />
+          </div>
         </div>
       ))}
 
@@ -75,6 +107,33 @@ export default function ItemCard({ purchases }: ItemCardProps) {
         onClose={handleCloseWrite}
         purchase={reviewWriteTarget}
         onSubmit={handleReviewSubmit}
+      />
+
+      {/* 주문 취소 모달 */}
+      <OrderCancelModal
+        open={!!cancelTarget}
+        onClose={handleCloseCancel}
+        item={cancelTarget}
+        relatedItems={
+          cancelTarget
+            ? (purchases as (OrderItemResponse & { orderId: string })[]).filter(
+                (p) => p.orderId === cancelTarget.orderId,
+              )
+            : []
+        }
+        totalAmount={
+          cancelTarget
+            ? (purchases as (OrderItemResponse & { orderId: string })[])
+                .filter((p) => p.orderId === cancelTarget.orderId)
+                .reduce((sum, p) => sum + p.price * p.quantity, 0)
+            : 0
+        }
+        onConfirm={() => {
+          if (cancelTarget) {
+            cancelOrderMutation.mutate(cancelTarget.orderId);
+          }
+        }}
+        isLoading={cancelOrderMutation.isPending}
       />
     </div>
   );
