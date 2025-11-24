@@ -9,7 +9,7 @@ export const storeCreateSchema = z.object({
   phoneNumber: z
     .string()
     .min(1, "전화번호를 입력하세요")
-    .regex(/^\d{2,3}-?\d{3,4}-?\d{4}$/, "유효한 전화번호를 입력하세요"),
+    .regex(/^\d{2,3}-\d{3,4}-\d{4}$/, "하이픈(-)을 포함한 전화번호를 입력하세요 (예: 02-1234-5678)"),
 
   image: z
     .custom<File>((file) => file instanceof File, {
