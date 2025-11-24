@@ -7,7 +7,8 @@ export const productFormSchema = z
       .string({
         required_error: "상품명을 입력해주세요",
       })
-      .min(1, "상품명을 입력해주세요"),
+      .min(1, "상품명을 입력해주세요")
+      .max(50, "상품명은 50자 이하로 입력해주세요"),
     image: z
       .any({
         required_error: "이미지를 등록해주세요",
@@ -19,14 +20,15 @@ export const productFormSchema = z
       .number({
         required_error: "상품 가격을 입력해주세요",
       })
-      .min(0, "0원 이상 입력해주세요"),
+      .min(0, "0원 이상 입력해주세요")
+      .max(100000000, "판매가는 1억원 이하로 입력해주세요"),
     category: z.enum(["TOP", "BOTTOM", "DRESS", "OUTER", "SKIRT", "SHOES", "ACC"], {
       required_error: "카테고리를 선택해주세요",
     }),
 
     // 옵션 및 재고
     sizes: z.array(z.string()).min(1, "최소 하나 이상의 사이즈를 선택해야 합니다"),
-    stocks: z.record(z.number().min(0).optional()).optional(),
+    stocks: z.record(z.number().min(0).max(10000, "재고는 1만개 이하로 입력해주세요").optional()).optional(),
 
     // 상품 할인
     discount: z.object({
