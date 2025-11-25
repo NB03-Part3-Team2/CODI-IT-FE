@@ -50,6 +50,11 @@ export default function OrderSummary({ onClick }: OrderSummaryProps) {
   // 적립 예정 포인트 계산 (유저 등급에 따른 적립률 적용)
   const expectedPoints = Math.floor(total * (userGradeRate / 100));
   const disableds = !orderInfo.name || !orderInfo.phone || !orderInfo.address;
+
+  // 전화번호 형식 검증
+  const validatePhoneNumber = (phone: string) => {
+    return /^01([0|1|6|7|8|9])-([0-9]{3,4})-([0-9]{4})$/.test(phone);
+  };
   return (
     <div className="w-[31.25rem]">
       <div className="border-gray03 mb-5 rounded-2xl border p-10">
@@ -81,6 +86,10 @@ export default function OrderSummary({ onClick }: OrderSummaryProps) {
         onClick={() => {
           if (disableds) {
             toast("warn", "모든 정보를 입력해주세요");
+            return;
+          }
+          if (!validatePhoneNumber(orderInfo.phone)) {
+            toast("error", "올바른 전화번호 형식이 아닙니다 (예: 010-1234-5678)");
             return;
           }
           onClick();
