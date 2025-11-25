@@ -7,8 +7,26 @@ export default function OrderInfoSection() {
   const [postalCode, setPostalCode] = useState("");
   const { orderInfo, setOrderInfo } = useOrderStore();
 
+  const formatPhoneNumber = (value: string) => {
+    // 숫자만 추출
+    const numbers = value.replace(/[^0-9]/g, "");
+
+    // 최대 8자리까지만 허용
+    const limitedNumbers = numbers.slice(0, 8);
+
+    // 길이에 따라 자동 포맷팅
+    if (limitedNumbers.length <= 3) {
+      return limitedNumbers;
+    } else if (limitedNumbers.length <= 4) {
+      return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`;
+    } else {
+      return `${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4)}`;
+    }
+  };
+
   const handlePhoneChange = (value: string) => {
-    setOrderInfo({ phone: selectedPrefix + value });
+    const formatted = formatPhoneNumber(value);
+    setOrderInfo({ phone: `${selectedPrefix}-${formatted}` });
   };
 
   return (
@@ -34,8 +52,8 @@ export default function OrderInfoSection() {
             />
             <input
               type="text"
-              placeholder="1234-5678"
-              value={orderInfo.phone.replace(selectedPrefix, "")}
+              placeholder="숫자만 입력 (예: 12345678)"
+              value={orderInfo.phone.replace(`${selectedPrefix}-`, "")}
               onChange={(e) => handlePhoneChange(e.target.value)}
               className="border-gray03 w-[15.625rem] rounded-md border px-5 py-3 text-base font-normal"
             />
