@@ -16,17 +16,38 @@ export default function OrderInfoSection() {
 
     // 길이에 따라 자동 포맷팅
     if (limitedNumbers.length <= 3) {
+      // 처음 3자리까지: "123"
       return limitedNumbers;
-    } else if (limitedNumbers.length <= 4) {
+    } else if (limitedNumbers.length <= 7) {
+      // 4-7자리: "123-4567" 형식 (중간 3자리, 마지막 4자리)
       return `${limitedNumbers.slice(0, 3)}-${limitedNumbers.slice(3)}`;
     } else {
+      // 8자리: "1234-5678" 형식 (중간 4자리, 마지막 4자리)
       return `${limitedNumbers.slice(0, 4)}-${limitedNumbers.slice(4)}`;
     }
   };
 
   const handlePhoneChange = (value: string) => {
     const formatted = formatPhoneNumber(value);
-    setOrderInfo({ phone: `${selectedPrefix}-${formatted}` });
+    setOrderInfo({ phone: formatted ? `${selectedPrefix}-${formatted}` : "" });
+  };
+
+  // prefix 변경 시 phone 값 업데이트
+  const handlePrefixChange = (newPrefix: string) => {
+    setSelectedPrefix(newPrefix);
+    // 기존 전화번호가 있으면 새 prefix로 업데이트
+    if (orderInfo.phone) {
+      const currentNumber = orderInfo.phone.split("-").slice(1).join("-");
+      setOrderInfo({ phone: currentNumber ? `${newPrefix}-${currentNumber}` : "" });
+    }
+  };
+
+  // input value 계산 (안전하게)
+  const getInputValue = () => {
+    if (!orderInfo.phone) return "";
+    const parts = orderInfo.phone.split("-");
+    if (parts.length <= 1) return "";
+    return parts.slice(1).join("-");
   };
 
   return (
@@ -48,12 +69,12 @@ export default function OrderInfoSection() {
           <div className="flex items-center gap-5">
             <ContactPrefixDropdown
               value={selectedPrefix}
-              onChange={setSelectedPrefix}
+              onChange={handlePrefixChange}
             />
             <input
               type="text"
               placeholder="숫자만 입력 (예: 12345678)"
-              value={orderInfo.phone.replace(`${selectedPrefix}-`, "")}
+              value={getInputValue()}
               onChange={(e) => handlePhoneChange(e.target.value)}
               className="border-gray03 w-[15.625rem] rounded-md border px-5 py-3 text-base font-normal"
             />

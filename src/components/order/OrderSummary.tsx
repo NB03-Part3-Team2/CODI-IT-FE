@@ -53,7 +53,12 @@ export default function OrderSummary({ onClick }: OrderSummaryProps) {
 
   // 전화번호 형식 검증
   const validatePhoneNumber = (phone: string) => {
-    return /^01([0|1|6|7|8|9])-([0-9]{3,4})-([0-9]{4})$/.test(phone);
+    const regex = /^01([0|1|6|7|8|9])-([0-9]{3,4})-([0-9]{4})$/;
+    if (!regex.test(phone)) return false;
+
+    // 총 길이 검증: 12(010-123-4567) 또는 13(010-1234-5678)
+    const length = phone.length;
+    return length === 12 || length === 13;
   };
   return (
     <div className="w-[31.25rem]">
